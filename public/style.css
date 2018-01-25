@@ -140,3 +140,7 @@ h2 {
     margin-top: 50px;
     max-width: 500px;
 }
+
+.per-page-select {
+    margin: 0 10px;
+}
