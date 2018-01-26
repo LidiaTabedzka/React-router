@@ -8,7 +8,6 @@ class CountryFlagContainer extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            pagesRange: [1, 2, 3],
             start_offset: 0
         };
     }
@@ -21,15 +20,23 @@ class CountryFlagContainer extends Component {
 
     search(event) {
         this.props.dispatch(searchCountries(event.target.value));
+        this.props.dispatch(setCurrentPage(1));
+        this.setState({start_offset: 0});
     }
 
     deleteCountry(id) {
         this.props.dispatch(deleteCountry(id));
+        const lastPageNumber = Math.ceil((this.props.visibleCountries.length-1) / this.props.countriesPerPage);
+        if (this.props.currentPage > lastPageNumber) {
+            this.props.dispatch(setCurrentPage(lastPageNumber));
+            this.setState({start_offset: (lastPageNumber - 1) * this.props.countriesPerPage});
+        }
     }
 
     chooseCountriesPerPage(event) {
         this.props.dispatch(setCountriesPerPage(event.target.value));
-        this.createArray(event.target.value);
+        this.props.dispatch(setCurrentPage(1));
+        this.setState({start_offset: 0});
     }
 
     createArray(perPage) {
@@ -37,7 +44,7 @@ class CountryFlagContainer extends Component {
         for (let i = 1; i <= Math.ceil(this.props.visibleCountries.length / perPage); i++) {
             pagesArray.push(i);
         }
-        this.setState({pagesRange : pagesArray});
+        return pagesArray;
     }
 
     currentPageHandler(number) {
@@ -63,8 +70,8 @@ class CountryFlagContainer extends Component {
                     </select>
                     państw na stronie
                 </div>
-                <Pagination pagesRange={this.state.pagesRange} currentPage={this.props.currentPage} currentPageHandler={(number) => this.currentPageHandler(number)}/>
-                <CountryFlagList start_offset={this.state.start_offset} countriesPerPage={this.props.countriesPerPage} countries={this.props.visibleCountries} deleteCountry={(id) => this.deleteCountry(id)}/>
+                <Pagination pagesRange={this.createArray(this.props.countriesPerPage)} currentPage={this.props.currentPage} currentPageHandler={(number) => this.currentPageHandler(number)}/>
+                <CountryFlagList countries={this.props.visibleCountries.slice(this.state.start_offset, this.state.start_offset + this.props.countriesPerPage)} deleteCountry={(id) => this.deleteCountry(id)}/>
             </div>
         )
     }
